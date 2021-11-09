@@ -1,0 +1,22 @@
+[
+    {
+        "Username": "bob",
+        "Password": "jones"
+    },
+    {
+        "username": "dsa",
+        "password": "ASD123!@#"
+    },
+    {
+        "username": "das",
+        "password": "ASD123!@#"
+    },
+    {
+        "username": "das",
+        "password": "asdASD123!@#"
+    },
+    {
+        "username": "",
+        "password": "ASDasd!@#123"
+    }
+]
