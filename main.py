@@ -29,10 +29,10 @@ class JsonTools:
 
 
 class PasswordChecker:
-    def __init__(self, password, confirm_password, message_frame):
+    def __init__(self, password, confirm_password, username, message_frame):
         self.password = password
         self.confirm_password = confirm_password
-        # pass in instance variable from Signup class
+        self.username = username
         self.message_frame = message_frame
 
     def clear(self):
@@ -78,6 +78,23 @@ class PasswordChecker:
         confirm_password_message = Label(self.message_frame, text="password do not match")
         confirm_password_message.pack()
 
+    def check_username(self):
+        json_file = JsonTools()
+        json_accounts = json_file.json_open()
+
+        for acc in range(len(json_accounts)):
+            if self.username == "":
+                print("invalid username")
+                username_message = Label(self.message_frame, text="invalid username")
+                username_message.pack()
+                return False
+            elif self.username in json_accounts[acc].values():
+                print("invalid username")
+                username_message = Label(self.message_frame, text="invalid username")
+                username_message.pack()
+                return False
+        return True
+
     def main(self):
         self.clear()
         check_number = self.check_number()
@@ -85,64 +102,200 @@ class PasswordChecker:
         check_punctuation = self.check_punctuation()
         check_length = self.check_length()
         confirm_password = self.check_confirm_password()
+        username = self.check_username()
 
-        if confirm_password:
-            if check_number and check_capital and check_punctuation and check_length:
-                self.clear()
-                print("account created")
-                account_created_message = Label(self.message_frame, text="account created")
-                account_created_message.pack()
-
-                return True
+        # if not all are true, prints out error message
+        if username:
+            if confirm_password:
+                if check_number and check_capital and check_punctuation and check_length:
+                    self.clear()
+                    print("account created")
+                    account_created_message = Label(self.message_frame, text="account created")
+                    account_created_message.pack()
+                    return True
         return False
 
 
-class ToDoList:  # needs to be finished
+class ToDoList:
     def __init__(self):
+        self.focused_frame = None
+
         self.root = Tk()
-        self.root.geometry("800x900")
+        self.root.geometry("1000x1300")
         self.root.title("To-Do-List")
+
         self.button_frame = Frame(self.root)
+        self.label_frame = Frame(self.root)
+
         self.button_frame.pack(pady=10)
-        self.entry_frame = Frame(self.root)
-        self.entry_frame.pack(pady=10)
+        self.label_frame.pack(pady=10)
 
-        self.add_button = Button(
-            self.button_frame, width=5, text="Add", command=self.add_button)
+        self.add_button = Button(self.button_frame, width=5, text="Add",
+                                 command=lambda: self.AddTask(self.task_container, self.focused_frame,
+                                                              self.focus_frame))
+        self.delete_button = Button(self.button_frame, width=5, text="Delete", command=self.delete_task)
+        self.edit_button = Button(self.button_frame, width=5, text="Edit",
+                                  command=lambda: self.EditTask(self.focused_frame).original_text())
+        self.save_file_button = Button(self.button_frame, width=5, text="Save", command=self.save_file)
+
         self.add_button.grid(row=1, column=0)
-
-        self.del_button = Button(
-            self.button_frame, width=5, text="Delete", command=self.del_button)
-        self.del_button.grid(row=1, column=1)
-
-        self.edit_button = Button(self.button_frame, width=5, text="Edit", command=self.edit_button)
+        self.delete_button.grid(row=1, column=1)
         self.edit_button.grid(row=1, column=2)
+        self.save_file_button.grid(row=1, column=3)
 
-        self.task_name_label = Label(self.entry_frame, text="Task Name")
+        self.task_name_label = Label(self.label_frame, text="Task Name", width=50)
+        self.task_desc_label = Label(self.label_frame, text="Task Desc", width=30)
+        self.task_date_label = Label(self.label_frame, text="Due Date", width=50)
+
         self.task_name_label.grid(row=0, column=0)
-        self.task_name_entry = Entry(self.entry_frame, width=20)
-        self.task_name_entry.grid(row=1, column=0)
-
-        self.task_desc_label = Label(self.entry_frame, text="Task Desc")
         self.task_desc_label.grid(row=0, column=1)
-        self.task_desc_entry = Entry(self.entry_frame, width=20)
-        self.task_desc_entry.grid(row=1, column=1)
+        self.task_date_label.grid(row=0, column=2)
 
-        self.task_date_label = Label(self.entry_frame, text="Due Date")
-        self.task_date_label.grid(row=0, column=3)
-        self.task_date_entry = Entry(self.entry_frame, width=20)
-        self.task_date_entry.grid(row=1, column=3)
+        self.task_container = Frame(self.root)
+        self.task_container.pack(pady=10)
 
         self.root.mainloop()
 
-    def add_button(self):
+    # determine the selected frame
+    # highlights it in yellow for visual clarity
+    def focus_frame(self, event):
+        if self.focused_frame:
+            for i in self.focused_frame.winfo_children():
+                i.configure(bg="white")
+
+            parent_widget = self.root.nametowidget(event.widget.winfo_parent())
+            child_widgets = parent_widget.winfo_children()
+
+            self.focused_frame = parent_widget
+
+            for i in child_widgets:
+                i.configure(bg="yellow")
+
+            print(child_widgets)
+        else:
+            parent_widget = self.root.nametowidget(event.widget.winfo_parent())
+            child_widgets = parent_widget.winfo_children()
+
+            self.focused_frame = parent_widget
+
+            for i in child_widgets:
+                i.configure(bg="yellow")
+
+            print(child_widgets)
+
+    def save_file(self):
         pass
 
-    def del_button(self):
-        pass
+    def delete_task(self):
+        try:
+            self.focused_frame.destroy()
+            self.focused_frame = None
+        except AttributeError:
+            print("focused frame does not exist")
 
-    def edit_button(self):
-        pass
+    class AddTask:
+        def __init__(self, task_container, focused_frame, focus_frame):
+            self.task_container = task_container
+            self.focused_frame = focused_frame
+            self.focus_frame = focus_frame
+
+            self.root = Tk()
+            self.root.geometry("400x100")
+            self.root.title("Add Task")
+
+            self.task_frame = Frame(self.root)
+            self.task_frame.pack(pady=5)
+
+            self.task_name_label = Label(self.task_frame, text="Task Name")
+            self.task_desc_label = Label(self.task_frame, text="Task Desc")
+            self.task_date_label = Label(self.task_frame, text="Task Date")
+
+            self.task_name_label.grid(row=0, column=0)
+            self.task_desc_label.grid(row=0, column=1)
+            self.task_date_label.grid(row=0, column=2)
+
+            self.task_name_entry = Entry(self.task_frame)
+            self.task_desc_entry = Entry(self.task_frame)
+            self.task_date_entry = Entry(self.task_frame)
+
+            self.task_name_entry.grid(row=1, column=0)
+            self.task_desc_entry.grid(row=1, column=1)
+            self.task_date_entry.grid(row=1, column=2)
+
+            self.add_button = Button(self.root, text="Add Task", command=self.add_task)
+            self.add_button.pack(pady=10)
+
+        def add_task(self):
+            task_date = self.task_date_entry.get()
+            task_desc = self.task_desc_entry.get()
+            task_name = self.task_name_entry.get()
+
+            task_frame = Frame(self.task_container)
+            task_frame.grid(row=0, column=0)
+
+            task_name_label = Label(task_frame, text=task_name, width=40, bg="white")
+            task_desc_label = Label(task_frame, text=task_desc, width=40, bg="white")
+            task_date_label = Label(task_frame, text=task_date, width=40, bg="white")
+
+            task_name_label.grid(row=0, column=0)
+            task_desc_label.grid(row=0, column=1)
+            task_date_label.grid(row=0, column=2)
+
+            # calls the focus_frame function after clicking on the label
+            task_name_label.bind("<Button-1>", lambda event: self.focus_frame(event))
+            task_desc_label.bind("<Button-1>", lambda event: self.focus_frame(event))
+            task_date_label.bind("<Button-1>", lambda event: self.focus_frame(event))
+
+            self.root.destroy()
+
+    class EditTask:
+        def __init__(self, focused_frame):
+            self.focused_frame = focused_frame
+
+            self.root = Tk()
+            self.root.geometry("400x100")
+            self.root.title("Edit Task")
+
+            self.task_frame = Frame(self.root)
+            self.task_frame.pack(pady=5)
+
+            self.task_name_label = Label(self.task_frame, text="Task Name")
+            self.task_desc_label = Label(self.task_frame, text="Task Desc")
+            self.task_date_label = Label(self.task_frame, text="Due Date")
+
+            self.task_name_label.grid(row=0, column=0)
+            self.task_desc_label.grid(row=0, column=1)
+            self.task_date_label.grid(row=0, column=2)
+
+            self.task_name_entry = Entry(self.task_frame)
+            self.task_desc_entry = Entry(self.task_frame)
+            self.task_date_entry = Entry(self.task_frame)
+
+            self.task_name_entry.grid(row=1, column=0)
+            self.task_desc_entry.grid(row=1, column=1)
+            self.task_date_entry.grid(row=1, column=2)
+
+            self.save_button = Button(self.task_frame, text="Save", command=self.save_new_text)
+            self.save_button.grid(row=2, column=1)
+
+        def original_text(self):
+            try:
+                # gets all the labels from the selected frame and appends it into a list
+                # adds each one into the entry as a default text
+                child_widget_list = [i.cget("text") for i in self.focused_frame.winfo_children()]
+                self.task_name_entry.insert(-1, child_widget_list[0])
+                self.task_desc_entry.insert(-1, child_widget_list[1])
+                self.task_date_entry.insert(-1, child_widget_list[2])
+            except AttributeError:
+                self.root.destroy()
+                print("no task selected")
+
+        def save_new_text(self):
+            child_widget_list = [i for i in self.focused_frame.winfo_children()]
+            child_widget_list[0].configure(text=self.task_name_entry.get())
+            child_widget_list[1].configure(text=self.task_desc_entry.get())
+            child_widget_list[2].configure(text=self.task_date_entry.get())
+            self.root.destroy()
 
 
 class Login:
@@ -154,33 +307,28 @@ class Login:
         self.main_frame = Frame(self.root)
         self.main_frame.pack(pady=5)
 
-        # title screen
         self.login_title = Label(self.main_frame, text="Login")
         self.login_title.grid(row=0, column=0)
 
-        # username entry/label
         self.username_label = Label(self.main_frame, text="Username")
+        self.password_label = Label(self.main_frame, text="Password")
+
         self.username_entry = Entry(self.main_frame)
+        self.password_entry = Entry(self.main_frame, show="*")
+
         self.username_entry.grid(row=2, column=0)
         self.username_label.grid(row=1, column=0)
-
-        # password entry/label
-        self.password_label = Label(self.main_frame, text="Password")
-        self.password_entry = Entry(self.main_frame, show="*")
         self.password_entry.grid(row=4, column=0)
         self.password_label.grid(row=3, column=0)
 
-        # error message
-        self.error_message = Label(self.root, text="")
-        self.error_message.pack()
+        self.login_button = Button(self.main_frame, width=20, text="Login", command=self.main)
+        self.signup_button = Button(self.main_frame, width=20, text="Signup", command=self.signup_gui)
 
-        # login button
-        self.login_button = Button(self.root, width=20, text="Login", command=self.main)
-        self.login_button.pack()
+        self.login_button.grid(row=5, column=0)
+        self.signup_button.grid(row=6, column=0)
 
-        # signup button
-        self.signup_button = Button(self.root, width=20, text="Signup", command=self.signup_gui)
-        self.signup_button.pack()
+        self.error_message = Label(self.main_frame, text="")
+        self.error_message.grid(row=7, column=0)
 
         self.root.mainloop()
 
@@ -225,27 +373,28 @@ class Signup:
         self.login_title.grid(row=0, column=0)
 
         self.username_label = Label(self.main_frame, text="Username")
-        self.username_label.grid(row=1, column=0)
-        self.username_entry = Entry(self.main_frame)
-        self.username_entry.grid(row=2, column=0)
-
         self.password_label = Label(self.main_frame, text="Password")
-        self.password_label.grid(row=3, column=0)
-        self.password_entry = Entry(self.main_frame, show="*")
-        self.password_entry.grid(row=4, column=0)
-
         self.confirm_password_label = Label(self.main_frame, text="Confirm Password")
-        self.confirm_password_label.grid(row=5, column=0)
+
+        self.username_entry = Entry(self.main_frame)
+        self.password_entry = Entry(self.main_frame, show="*")
         self.confirm_password_entry = Entry(self.main_frame, show="*")
+
+        self.username_label.grid(row=1, column=0)
+        self.password_label.grid(row=3, column=0)
+        self.confirm_password_label.grid(row=5, column=0)
+
+        self.username_entry.grid(row=2, column=0)
+        self.password_entry.grid(row=4, column=0)
         self.confirm_password_entry.grid(row=6, column=0)
 
         self.button_frame = Frame(self.root)
         self.button_frame.pack(pady=5)
 
-        self.signup_button = Button(self.button_frame, width=20, text="Signup", command=self.main)
-        self.signup_button.grid(row=0, column=0)
-
+        self.signup_button = Button(self.button_frame, width=20, text="Signup", command=self.check_password)
         self.login_button = Button(self.button_frame, width=20, text="Login", command=self.login_gui)
+
+        self.signup_button.grid(row=0, column=0)
         self.login_button.grid(row=1, column=0)
 
         self.message_frame = Frame(self.root)
@@ -260,16 +409,14 @@ class Signup:
         password = self.password_entry.get()
         confirm_password = self.confirm_password_entry.get()
 
-        check_pwd = PasswordChecker(password, confirm_password, self.message_frame)
+        check_pwd = PasswordChecker(password, confirm_password, username, self.message_frame)
         if check_pwd.main():
             # if requirements are met
             # saves the username, password into json file
             json_file = JsonTools()
             json_file.json_save(username, password)
             self.root.destroy()
-
-    def main(self):
-        self.check_password()
+            ToDoList()
 
 
 def main():
