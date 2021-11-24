@@ -335,7 +335,7 @@ class Login:
     def check_account(self):
         username = self.username_entry.get()
         password = self.password_entry.get()
-        account = {"Username": username, "Password": password}
+        account = {"username": username, "password": password}
 
         # opens json file
         json_file = JsonTools()
