@@ -1,10 +1,6 @@
 [
-    {
-        "Username": "bob",
-        "Password": "jones"
-    },
-    {
-        "username": "bobjonmes",
-        "password": "QWEqwe!@#123"
-    }
+  {
+    "username": "",
+    "password": ""
+  }
 ]

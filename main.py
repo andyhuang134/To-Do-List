@@ -117,8 +117,9 @@ class PasswordChecker:
 
 
 class ToDoList:
-    def __init__(self):
+    def __init__(self,current_user):
         self.focused_frame = None
+        self.current_user = current_user
 
         self.root = Tk()
         self.root.geometry("1000x1300")
@@ -136,7 +137,7 @@ class ToDoList:
         self.delete_button = Button(self.button_frame, width=5, text="Delete", command=self.delete_task)
         self.edit_button = Button(self.button_frame, width=5, text="Edit",
                                   command=lambda: self.EditTask(self.focused_frame).original_text())
-        self.save_file_button = Button(self.button_frame, width=5, text="Save", command=self.save_file)
+        self.save_file_button = Button(self.button_frame, width=5, text="Save", command=lambda: self.SaveFile(self,self.current_user).main())
 
         self.add_button.grid(row=1, column=0)
         self.delete_button.grid(row=1, column=1)
@@ -183,11 +184,33 @@ class ToDoList:
 
             print(child_widgets)
 
-    def save_file(self):
-        pass
+    class SaveFile:
+        def __init__(self, ToDoList_class, current_user):
+            self.ToDoList_class = ToDoList_class
+            self.current_user = current_user
+            self.json_tools = JsonTools()
+
+        def get_contents(self, task_container):
+            for i in task_container.winfo_children():
+                task_labels = [j.cget("text")for j in i.winfo_children()]
+                yield task_labels
+        
+        def something(self, task_generator):
+            data = self.json_tools.json_open()
+            for i in data:
+                if i{"userame"} == self.current_user:
+                    
+
+                    
+        def main(self):
+            task_container = self.ToDoList_class.task_container
+            print(task_container)
+            task_generator = self.get_contents(task_container)
+            
+
 
     def delete_task(self):
-        try:
+        try:    
             self.focused_frame.destroy()
             self.focused_frame = None
         except AttributeError:
@@ -345,19 +368,19 @@ class Login:
             # destroys login widget
             # opens the to-do-list widget
             self.root.destroy()
-            return True
+            return username
         else:
             print("Username or Password is invalid")
             self.error_message.configure(text="Username or Password is invalid", fg="red")
-        return False
 
     def signup_gui(self):
         Signup()
         self.root.destroy()
 
     def main(self):
-        if self.check_account():
-            ToDoList()
+        founded_account = self.check_account()
+        if founded_account:
+            ToDoList(founded_account)
 
 
 class Signup:
