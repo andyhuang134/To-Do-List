@@ -1,6 +1,29 @@
 [
-  {
-    "username": "",
-    "password": ""
-  }
+    {
+        "username": "bob",
+        "password": "jones",
+        "tasks": [
+            [
+                "fa",
+                "afsd",
+                "f"
+            ],
+            [
+                "das",
+                "dasdsa",
+                "dsa"
+            ]
+        ]
+    },
+    {
+        "username": "bobby",
+        "password": "joness",
+        "tasks": [
+            [
+                "fa",
+                "afsd",
+                "f"
+            ]
+        ]
+    }
 ]

@@ -2,6 +2,7 @@
 from tkinter import *
 import json
 import string
+# fix passworch checker sing up
 
 
 class JsonTools:
@@ -11,7 +12,7 @@ class JsonTools:
     def json_save(self, username, password):
         # takes in the username and password
         # saves it into the json file
-        json_format = {"username": username, "password": password}
+        json_format = {"username": username, "password": password, "tasks": []}
         with open(self.json_file, "r") as f:
             read_file = f.read()
             json_dict = json.loads(read_file)
@@ -44,7 +45,8 @@ class PasswordChecker:
             if letter.isnumeric():
                 return True
         print("you need at least 1 number")
-        number_message = Label(self.message_frame, text="you need at least 1 number")
+        number_message = Label(
+            self.message_frame, text="you need at least 1 number")
         number_message.pack()
 
     def check_capital(self):
@@ -52,7 +54,8 @@ class PasswordChecker:
             if letter.isupper():
                 return True
         print("you need at least 1 capital letter")
-        capital_message = Label(self.message_frame, text="you need at least 1 capital letter")
+        capital_message = Label(
+            self.message_frame, text="you need at least 1 capital letter")
         capital_message.pack()
 
     def check_punctuation(self):
@@ -60,7 +63,8 @@ class PasswordChecker:
             if letter in string.punctuation:
                 return True
         print("you need at least 1 punctuation")
-        punctuation_message = Label(self.message_frame, text="you need at least 1 punctuation")
+        punctuation_message = Label(
+            self.message_frame, text="you need at least 1 punctuation")
         punctuation_message.pack()
 
     def check_length(self):
@@ -68,14 +72,16 @@ class PasswordChecker:
         if length >= 8:
             return True
         print("password needs to be at least 8 characters long")
-        length_message = Label(self.message_frame, text="password needs to be at least 8 characters long")
+        length_message = Label(
+            self.message_frame, text="password needs to be at least 8 characters long")
         length_message.pack()
 
     def check_confirm_password(self):
         if self.password == self.confirm_password:
             return True
         print("passwords do not match")
-        confirm_password_message = Label(self.message_frame, text="password do not match")
+        confirm_password_message = Label(
+            self.message_frame, text="password do not match")
         confirm_password_message.pack()
 
     def check_username(self):
@@ -85,12 +91,14 @@ class PasswordChecker:
         for acc in range(len(json_accounts)):
             if self.username == "":
                 print("invalid username")
-                username_message = Label(self.message_frame, text="invalid username")
+                username_message = Label(
+                    self.message_frame, text="invalid username")
                 username_message.pack()
                 return False
             elif self.username in json_accounts[acc].values():
                 print("invalid username")
-                username_message = Label(self.message_frame, text="invalid username")
+                username_message = Label(
+                    self.message_frame, text="invalid username")
                 username_message.pack()
                 return False
         return True
@@ -110,14 +118,15 @@ class PasswordChecker:
                 if check_number and check_capital and check_punctuation and check_length:
                     self.clear()
                     print("account created")
-                    account_created_message = Label(self.message_frame, text="account created")
+                    account_created_message = Label(
+                        self.message_frame, text="account created")
                     account_created_message.pack()
                     return True
         return False
 
 
 class ToDoList:
-    def __init__(self,current_user):
+    def __init__(self, current_user):
         self.focused_frame = None
         self.current_user = current_user
 
@@ -134,19 +143,24 @@ class ToDoList:
         self.add_button = Button(self.button_frame, width=5, text="Add",
                                  command=lambda: self.AddTask(self.task_container, self.focused_frame,
                                                               self.focus_frame))
-        self.delete_button = Button(self.button_frame, width=5, text="Delete", command=self.delete_task)
+        self.delete_button = Button(
+            self.button_frame, width=5, text="Delete", command=self.delete_task)
         self.edit_button = Button(self.button_frame, width=5, text="Edit",
                                   command=lambda: self.EditTask(self.focused_frame).original_text())
-        self.save_file_button = Button(self.button_frame, width=5, text="Save", command=lambda: self.SaveFile(self,self.current_user).main())
+        self.save_file_button = Button(self.button_frame, width=5, text="Save",
+                                       command=lambda: self.SaveFile(self, self.current_user).main())
 
         self.add_button.grid(row=1, column=0)
         self.delete_button.grid(row=1, column=1)
         self.edit_button.grid(row=1, column=2)
         self.save_file_button.grid(row=1, column=3)
 
-        self.task_name_label = Label(self.label_frame, text="Task Name", width=50)
-        self.task_desc_label = Label(self.label_frame, text="Task Desc", width=30)
-        self.task_date_label = Label(self.label_frame, text="Due Date", width=50)
+        self.task_name_label = Label(
+            self.label_frame, text="Task Name", width=50)
+        self.task_desc_label = Label(
+            self.label_frame, text="Task Desc", width=30)
+        self.task_date_label = Label(
+            self.label_frame, text="Due Date", width=50)
 
         self.task_name_label.grid(row=0, column=0)
         self.task_desc_label.grid(row=0, column=1)
@@ -191,26 +205,30 @@ class ToDoList:
             self.json_tools = JsonTools()
 
         def get_contents(self, task_container):
+            print("joe")
             for i in task_container.winfo_children():
-                task_labels = [j.cget("text")for j in i.winfo_children()]
-                yield task_labels
-        
-        def something(self, task_generator):
+                task_labels = [j.cget("text") for j in i.winfo_children()]
+            return task_labels
+
+        def something(self, task_labels):
             data = self.json_tools.json_open()
             for i in data:
-                if i{"userame"} == self.current_user:
-                    
+                if i["username"] == self.current_user:
+                    i["tasks"].append(task_labels)
+            return data
 
-                    
+        def save(self, json_tools, data):
+            with open(self.json_tools.json_file, "w") as f:
+                json.dump(data, f, indent=4)
+
         def main(self):
             task_container = self.ToDoList_class.task_container
-            print(task_container)
-            task_generator = self.get_contents(task_container)
-            
-
+            task_labels = self.get_contents(task_container)
+            data = self.something(task_labels)
+            self.save(self.json_tools, data)
 
     def delete_task(self):
-        try:    
+        try:
             self.focused_frame.destroy()
             self.focused_frame = None
         except AttributeError:
@@ -245,7 +263,8 @@ class ToDoList:
             self.task_desc_entry.grid(row=1, column=1)
             self.task_date_entry.grid(row=1, column=2)
 
-            self.add_button = Button(self.root, text="Add Task", command=self.add_task)
+            self.add_button = Button(
+                self.root, text="Add Task", command=self.add_task)
             self.add_button.pack(pady=10)
 
         def add_task(self):
@@ -256,18 +275,24 @@ class ToDoList:
             task_frame = Frame(self.task_container)
             task_frame.grid(row=0, column=0)
 
-            task_name_label = Label(task_frame, text=task_name, width=40, bg="white")
-            task_desc_label = Label(task_frame, text=task_desc, width=40, bg="white")
-            task_date_label = Label(task_frame, text=task_date, width=40, bg="white")
+            task_name_label = Label(
+                task_frame, text=task_name, width=40, bg="white")
+            task_desc_label = Label(
+                task_frame, text=task_desc, width=40, bg="white")
+            task_date_label = Label(
+                task_frame, text=task_date, width=40, bg="white")
 
             task_name_label.grid(row=0, column=0)
             task_desc_label.grid(row=0, column=1)
             task_date_label.grid(row=0, column=2)
 
             # calls the focus_frame function after clicking on the label
-            task_name_label.bind("<Button-1>", lambda event: self.focus_frame(event))
-            task_desc_label.bind("<Button-1>", lambda event: self.focus_frame(event))
-            task_date_label.bind("<Button-1>", lambda event: self.focus_frame(event))
+            task_name_label.bind(
+                "<Button-1>", lambda event: self.focus_frame(event))
+            task_desc_label.bind(
+                "<Button-1>", lambda event: self.focus_frame(event))
+            task_date_label.bind(
+                "<Button-1>", lambda event: self.focus_frame(event))
 
             self.root.destroy()
 
@@ -298,14 +323,16 @@ class ToDoList:
             self.task_desc_entry.grid(row=1, column=1)
             self.task_date_entry.grid(row=1, column=2)
 
-            self.save_button = Button(self.task_frame, text="Save", command=self.save_new_text)
+            self.save_button = Button(
+                self.task_frame, text="Save", command=self.save_new_text)
             self.save_button.grid(row=2, column=1)
 
         def original_text(self):
             try:
                 # gets all the labels from the selected frame and appends it into a list
                 # adds each one into the entry as a default text
-                child_widget_list = [i.cget("text") for i in self.focused_frame.winfo_children()]
+                child_widget_list = [
+                    i.cget("text") for i in self.focused_frame.winfo_children()]
                 self.task_name_entry.insert(-1, child_widget_list[0])
                 self.task_desc_entry.insert(-1, child_widget_list[1])
                 self.task_date_entry.insert(-1, child_widget_list[2])
@@ -314,7 +341,8 @@ class ToDoList:
                 print("no task selected")
 
         def save_new_text(self):
-            child_widget_list = [i for i in self.focused_frame.winfo_children()]
+            child_widget_list = [
+                i for i in self.focused_frame.winfo_children()]
             child_widget_list[0].configure(text=self.task_name_entry.get())
             child_widget_list[1].configure(text=self.task_desc_entry.get())
             child_widget_list[2].configure(text=self.task_date_entry.get())
@@ -344,8 +372,10 @@ class Login:
         self.password_entry.grid(row=4, column=0)
         self.password_label.grid(row=3, column=0)
 
-        self.login_button = Button(self.main_frame, width=20, text="Login", command=self.main)
-        self.signup_button = Button(self.main_frame, width=20, text="Signup", command=self.signup_gui)
+        self.login_button = Button(
+            self.main_frame, width=20, text="Login", command=self.main)
+        self.signup_button = Button(
+            self.main_frame, width=20, text="Signup", command=self.signup_gui)
 
         self.login_button.grid(row=5, column=0)
         self.signup_button.grid(row=6, column=0)
@@ -358,20 +388,20 @@ class Login:
     def check_account(self):
         username = self.username_entry.get()
         password = self.password_entry.get()
-        account = {"username": username, "password": password}
 
         # opens json file
         json_file = JsonTools()
         json_account = json_file.json_open()
 
-        if account in json_account:
-            # destroys login widget
-            # opens the to-do-list widget
-            self.root.destroy()
-            return username
-        else:
-            print("Username or Password is invalid")
-            self.error_message.configure(text="Username or Password is invalid", fg="red")
+        for i in json_account:
+            if username == i["username"]:
+                if password == i["password"]:
+                    self.root.destroy()
+                    return username
+            else:
+                print("Username or Password is invalid")
+                self.error_message.configure(
+                    text="Username or Password is invalid", fg="red")
 
     def signup_gui(self):
         Signup()
@@ -397,7 +427,8 @@ class Signup:
 
         self.username_label = Label(self.main_frame, text="Username")
         self.password_label = Label(self.main_frame, text="Password")
-        self.confirm_password_label = Label(self.main_frame, text="Confirm Password")
+        self.confirm_password_label = Label(
+            self.main_frame, text="Confirm Password")
 
         self.username_entry = Entry(self.main_frame)
         self.password_entry = Entry(self.main_frame, show="*")
@@ -414,8 +445,10 @@ class Signup:
         self.button_frame = Frame(self.root)
         self.button_frame.pack(pady=5)
 
-        self.signup_button = Button(self.button_frame, width=20, text="Signup", command=self.check_password)
-        self.login_button = Button(self.button_frame, width=20, text="Login", command=self.login_gui)
+        self.signup_button = Button(
+            self.button_frame, width=20, text="Signup", command=self.check_password)
+        self.login_button = Button(
+            self.button_frame, width=20, text="Login", command=self.login_gui)
 
         self.signup_button.grid(row=0, column=0)
         self.login_button.grid(row=1, column=0)
@@ -432,7 +465,8 @@ class Signup:
         password = self.password_entry.get()
         confirm_password = self.confirm_password_entry.get()
 
-        check_pwd = PasswordChecker(password, confirm_password, username, self.message_frame)
+        check_pwd = PasswordChecker(
+            password, confirm_password, username, self.message_frame)
         if check_pwd.main():
             # if requirements are met
             # saves the username, password into json file
