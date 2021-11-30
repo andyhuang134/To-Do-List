@@ -217,7 +217,16 @@ class ToDoList:
                     i["tasks"].append(task_labels)
             return data
 
-        def save(self, json_tools, data):
+        def refresh_tasks(self):
+            tasks = self.json_tools.json_open()
+            for i in tasks:
+                if i["username"] == self.current_user:
+                    i["tasks"] = []
+            return tasks  # save this one first
+
+        def save(self, json_tools, data, refresh_tasks):
+            with open(self.json_tools.json_file, "w") as f:
+                json.dump(refresh_tasks, f, indent=4)
             with open(self.json_tools.json_file, "w") as f:
                 json.dump(data, f, indent=4)
 
@@ -225,7 +234,8 @@ class ToDoList:
             task_container = self.ToDoList_class.task_container
             task_labels = self.get_contents(task_container)
             data = self.something(task_labels)
-            self.save(self.json_tools, data)
+            refresh_tasks = self.refresh_tasks()
+            self.save(self.json_tools, data, refresh_tasks)
 
     def delete_task(self):
         try:
@@ -273,7 +283,7 @@ class ToDoList:
             task_name = self.task_name_entry.get()
 
             task_frame = Frame(self.task_container)
-            task_frame.grid(row=0, column=0)
+            task_frame.pack(pady=2)
 
             task_name_label = Label(
                 task_frame, text=task_name, width=40, bg="white")
@@ -398,10 +408,10 @@ class Login:
                 if password == i["password"]:
                     self.root.destroy()
                     return username
-            else:
-                print("Username or Password is invalid")
-                self.error_message.configure(
-                    text="Username or Password is invalid", fg="red")
+        else:
+            print("Username or Password is invalid")
+            self.error_message.configure(
+                text="Username or Password is invalid", fg="red")
 
     def signup_gui(self):
         Signup()
