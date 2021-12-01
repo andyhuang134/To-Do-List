@@ -2,7 +2,6 @@
 from tkinter import *
 import json
 import string
-# fix passworch checker sing up
 
 
 class JsonTools:
@@ -44,7 +43,6 @@ class PasswordChecker:
         for letter in self.password:
             if letter.isnumeric():
                 return True
-        print("you need at least 1 number")
         number_message = Label(
             self.message_frame, text="you need at least 1 number")
         number_message.pack()
@@ -53,7 +51,6 @@ class PasswordChecker:
         for letter in self.password:
             if letter.isupper():
                 return True
-        print("you need at least 1 capital letter")
         capital_message = Label(
             self.message_frame, text="you need at least 1 capital letter")
         capital_message.pack()
@@ -62,7 +59,6 @@ class PasswordChecker:
         for letter in self.password:
             if letter in string.punctuation:
                 return True
-        print("you need at least 1 punctuation")
         punctuation_message = Label(
             self.message_frame, text="you need at least 1 punctuation")
         punctuation_message.pack()
@@ -71,7 +67,6 @@ class PasswordChecker:
         length = len(self.password)
         if length >= 8:
             return True
-        print("password needs to be at least 8 characters long")
         length_message = Label(
             self.message_frame, text="password needs to be at least 8 characters long")
         length_message.pack()
@@ -79,7 +74,6 @@ class PasswordChecker:
     def check_confirm_password(self):
         if self.password == self.confirm_password:
             return True
-        print("passwords do not match")
         confirm_password_message = Label(
             self.message_frame, text="password do not match")
         confirm_password_message.pack()
@@ -90,13 +84,11 @@ class PasswordChecker:
 
         for acc in range(len(json_accounts)):
             if self.username == "":
-                print("invalid username")
                 username_message = Label(
                     self.message_frame, text="invalid username")
                 username_message.pack()
                 return False
             elif self.username in json_accounts[acc].values():
-                print("invalid username")
                 username_message = Label(
                     self.message_frame, text="invalid username")
                 username_message.pack()
@@ -117,7 +109,6 @@ class PasswordChecker:
             if confirm_password:
                 if check_number and check_capital and check_punctuation and check_length:
                     self.clear()
-                    print("account created")
                     account_created_message = Label(
                         self.message_frame, text="account created")
                     account_created_message.pack()
@@ -169,6 +160,8 @@ class ToDoList:
         self.task_container = Frame(self.root)
         self.task_container.pack(pady=10)
 
+        self.LoadTask(self, self.current_user).main()
+
         self.root.mainloop()
 
     # determine the selected frame
@@ -198,51 +191,99 @@ class ToDoList:
 
             print(child_widgets)
 
-    class SaveFile:
-        def __init__(self, ToDoList_class, current_user):
-            self.ToDoList_class = ToDoList_class
-            self.current_user = current_user
-            self.json_tools = JsonTools()
-
-        def get_contents(self, task_container):
-            print("joe")
-            for i in task_container.winfo_children():
-                task_labels = [j.cget("text") for j in i.winfo_children()]
-            return task_labels
-
-        def something(self, task_labels):
-            data = self.json_tools.json_open()
-            for i in data:
-                if i["username"] == self.current_user:
-                    i["tasks"].append(task_labels)
-            return data
-
-        def refresh_tasks(self):
-            tasks = self.json_tools.json_open()
-            for i in tasks:
-                if i["username"] == self.current_user:
-                    i["tasks"] = []
-            return tasks  # save this one first
-
-        def save(self, json_tools, data, refresh_tasks):
-            with open(self.json_tools.json_file, "w") as f:
-                json.dump(refresh_tasks, f, indent=4)
-            with open(self.json_tools.json_file, "w") as f:
-                json.dump(data, f, indent=4)
-
-        def main(self):
-            task_container = self.ToDoList_class.task_container
-            task_labels = self.get_contents(task_container)
-            data = self.something(task_labels)
-            refresh_tasks = self.refresh_tasks()
-            self.save(self.json_tools, data, refresh_tasks)
-
     def delete_task(self):
         try:
             self.focused_frame.destroy()
             self.focused_frame = None
         except AttributeError:
             print("focused frame does not exist")
+
+    class SaveFile:
+        def __init__(self, ToDoList_class, current_user):
+            self.ToDoList_class = ToDoList_class
+            self.current_user = current_user
+            self.json_tools = JsonTools()
+
+        def format_tasks(self, task_name, task_desc, task_date):
+            format_task = {
+                "task name": task_name,
+                "description": task_desc,
+                "due date": task_date
+            }
+            return format_task
+
+        def get_contents(self, task_container):
+            for i in task_container.winfo_children():
+                task_labels = [j.cget("text") for j in i.winfo_children()]
+                formatted_task = self.format_tasks(
+                    task_labels[0], task_labels[1], task_labels[2])
+                new_task = self.append_tasks(formatted_task)
+                self.save(new_task)
+
+        def append_tasks(self, task_labels):
+            data = self.json_tools.json_open()
+            for i in data:
+                if i["username"] == self.current_user:
+                    if task_labels not in i["tasks"]:
+                        i["tasks"].append(task_labels)
+            return data
+
+        def refresh_tasks(self):
+            data = self.json_tools.json_open()
+            for i in data:
+                if i["username"] == self.current_user:
+                    i["tasks"] = []
+            return data  # save this one first
+
+        def save(self, data):
+            with open(self.json_tools.json_file, "w") as f:
+                json.dump(data, f, indent=4)
+
+        def main(self):
+            self.save(self.refresh_tasks())
+            task_container = self.ToDoList_class.task_container
+            self.get_contents(task_container)
+
+    class LoadTask:
+        def __init__(self, ToDoList_class, current_user):
+            self.json_tools = JsonTools()
+            self.ToDoList_class = ToDoList_class
+            self.current_user = current_user
+
+        def add_task(self, name, desc, date):
+            task_date = name
+            task_desc = desc
+            task_name = date
+
+            task_frame = Frame(self.ToDoList_class.task_container)
+            task_frame.pack(pady=2)
+
+            task_name_label = Label(
+                task_frame, text=task_name, width=40, bg="white")
+            task_desc_label = Label(
+                task_frame, text=task_desc, width=40, bg="white")
+            task_date_label = Label(
+                task_frame, text=task_date, width=40, bg="white")
+
+            task_name_label.grid(row=0, column=0)
+            task_desc_label.grid(row=0, column=1)
+            task_date_label.grid(row=0, column=2)
+
+            # calls the focus_frame function after clicking on the label
+            task_name_label.bind(
+                "<Button-1>", lambda event: self.ToDoList_class.focus_frame(event))
+            task_desc_label.bind(
+                "<Button-1>", lambda event: self.ToDoList_class.focus_frame(event))
+            task_date_label.bind(
+                "<Button-1>", lambda event: self.ToDoList_class.focus_frame(event))
+
+        def main(self):
+            data = self.json_tools.json_open()
+            for i in data:
+                if i["username"] == self.current_user:
+                    for j in i["tasks"]:
+                        self.add_task(j["task name"],
+                                      j["description"], j["due date"])
 
     class AddTask:
         def __init__(self, task_container, focused_frame, focus_frame):
@@ -348,7 +389,6 @@ class ToDoList:
                 self.task_date_entry.insert(-1, child_widget_list[2])
             except AttributeError:
                 self.root.destroy()
-                print("no task selected")
 
         def save_new_text(self):
             child_widget_list = [
@@ -409,7 +449,6 @@ class Login:
                     self.root.destroy()
                     return username
         else:
-            print("Username or Password is invalid")
             self.error_message.configure(
                 text="Username or Password is invalid", fg="red")
 
@@ -483,7 +522,7 @@ class Signup:
             json_file = JsonTools()
             json_file.json_save(username, password)
             self.root.destroy()
-            ToDoList()
+            ToDoList(username)
 
 
 def main():
